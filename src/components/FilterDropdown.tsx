@@ -27,7 +27,7 @@ export default function FilterDropdown({
 
   return (
     <div className="flex items-center space-x-2">
-      <span className="text-sm font-medium text-gray-600">{label}:</span>
+      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{label}:</span>
       <Select onValueChange={handleSelect} value={selectedValue ?? "all"}>
         <SelectTrigger className="w-[180px] text-sm">
           <SelectValue placeholder={`All ${label}`} />

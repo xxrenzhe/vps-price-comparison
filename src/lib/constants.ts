@@ -7,9 +7,11 @@ export const TABLE_DEFAULTS = {
   ROWS_PER_PAGE_OPTIONS: [10, 25, 50, 100],
 };
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
 export const API = {
-  PROVIDERS: '/api/providers',
-  VPS: '/api/vps',
+  PROVIDERS: `${API_BASE_URL}/api/providers`,
+  VPS: `${API_BASE_URL}/api/vps`,
 };
 
 export const FLAG_CDN_URL = 'https://flagcdn.com/w20'; 

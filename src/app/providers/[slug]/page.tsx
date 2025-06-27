@@ -11,6 +11,7 @@ import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import type { Metadata } from "next";
 import VPSTable from '@/components/VPSTable';
+import { Suspense } from 'react';
 
 export async function generateStaticParams() {
   return providerDetails.map((p) => ({
@@ -18,14 +19,8 @@ export async function generateStaticParams() {
   }));
 }
 
-type ProviderDetailPageProps = {
-  params: {
-    slug: string;
-  };
-};
-
-export async function generateMetadata({ params }: ProviderDetailPageProps): Promise<Metadata> {
-  const { slug } = params;
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const slug = params.slug;
   const provider = providerDetails.find(p => p.id === slug);
 
   if (!provider) {
@@ -57,8 +52,8 @@ export async function generateMetadata({ params }: ProviderDetailPageProps): Pro
   };
 }
 
-export default async function ProviderDetailPage({ params }: ProviderDetailPageProps) {
-  const { slug } = params;
+export default async function ProviderDetailPage({ params }: { params: { slug: string } }) {
+  const slug = params.slug;
   const provider = providerDetails.find(p => p.id === slug);
 
   if (!provider) {
@@ -95,17 +90,17 @@ export default async function ProviderDetailPage({ params }: ProviderDetailPageP
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Navigation />
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 bg-gray-50 dark:bg-gray-950">
         <main>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="md:col-span-2">
-              <Card>
+              <Card className="bg-white dark:bg-gray-900">
                 <CardHeader>
                   <div className="flex items-center space-x-4">
-                    <Image src={provider.logo} alt={`${provider.name} logo`} width={48} height={48} className="object-contain" />
+                    <Image src={provider.logo} alt={`${provider.name} logo`} width={48} height={48} className="object-contain rounded-md bg-white p-1" />
                     <div>
-                      <h1 className="text-3xl font-bold">{provider.name}</h1>
-                      <div className="prose max-w-none">
+                      <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{provider.name}</h1>
+                      <div className="prose max-w-none text-gray-600 dark:text-gray-400">
                         <p>{provider.description}</p>
                       </div>
                     </div>
@@ -113,47 +108,49 @@ export default async function ProviderDetailPage({ params }: ProviderDetailPageP
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-600">Founded</p>
-                      <p className="text-lg font-semibold">{provider.founded}</p>
+                    <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Founded</p>
+                      <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{provider.founded}</p>
                     </div>
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-600">Rating</p>
-                      <p className="text-lg font-semibold">{provider.rating} / 5</p>
+                    <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Rating</p>
+                      <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{provider.rating} / 5</p>
                     </div>
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-600">Customers</p>
-                      <p className="text-lg font-semibold">{provider.customers}</p>
+                    <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Customers</p>
+                      <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{provider.customers}</p>
                     </div>
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-600">Datacenters</p>
-                      <p className="text-lg font-semibold">{provider.datacenters}</p>
+                    <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Datacenters</p>
+                      <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{provider.datacenters}</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               <div className="mt-12">
-                <h2 className="text-2xl font-bold tracking-tight text-gray-900 mb-6">
+                <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 mb-6">
                   VPS Plans from {provider.name}
                 </h2>
-                <VPSTable
-                  providerFilter={slug}
-                  showProviderColumn={false}
-                  defaultPageSize={10}
-                  showDataSourceToggle={false}
-                  showProviderFilter={false}
-                  showTypeFilter={false}
-                />
+                <Suspense fallback={<div>Loading plans...</div>}>
+                  <VPSTable
+                    providerFilter={slug}
+                    showProviderColumn={false}
+                    defaultPageSize={10}
+                    showDataSourceToggle={false}
+                    showProviderFilter={false}
+                    showTypeFilter={false}
+                  />
+                </Suspense>
               </div>
             </div>
             <div className="space-y-6">
-              <Card>
+              <Card className="bg-white dark:bg-gray-900">
                 <CardHeader>
-                  <h3 className="text-lg font-bold">Quick Facts</h3>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Quick Facts</h3>
                 </CardHeader>
                 <CardContent>
-                  <ul className="text-sm text-gray-600 space-y-2">
+                  <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
                     <li><strong>Founded:</strong> {provider.founded}</li>
                     <li><strong>Headquarters:</strong> {provider.headquarters}</li>
                     <li><strong>Datacenters:</strong> {provider.datacenters}</li>
@@ -161,9 +158,9 @@ export default async function ProviderDetailPage({ params }: ProviderDetailPageP
                   </ul>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bg-white dark:bg-gray-900">
                 <CardHeader>
-                  <h3 className="text-lg font-bold">Features</h3>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Features</h3>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
@@ -173,9 +170,9 @@ export default async function ProviderDetailPage({ params }: ProviderDetailPageP
                   </div>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bg-white dark:bg-gray-900">
                 <CardHeader>
-                  <h3 className="text-lg font-bold">Specialties</h3>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Specialties</h3>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
@@ -185,9 +182,9 @@ export default async function ProviderDetailPage({ params }: ProviderDetailPageP
                   </div>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bg-white dark:bg-gray-900">
                 <CardHeader>
-                  <h3 className="text-lg font-bold">Other Providers</h3>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Other Providers</h3>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
@@ -195,8 +192,8 @@ export default async function ProviderDetailPage({ params }: ProviderDetailPageP
                       .filter(p => p.id !== slug)
                       .slice(0, 5)
                       .map(p => (
-                        <Link key={p.id} href={`/providers/${p.id}`} className="flex items-center space-x-2 text-sm text-blue-600 hover:underline">
-                           <Image src={p.logo} alt={`${p.name} logo`} width={20} height={20} className="object-contain" />
+                        <Link key={p.id} href={`/providers/${p.id}`} className="flex items-center space-x-2 text-sm text-blue-600 hover:underline dark:text-blue-400">
+                           <Image src={p.logo} alt={`${p.name} logo`} width={20} height={20} className="object-contain rounded-md bg-white p-0.5" />
                            <span>{p.name}</span>
                         </Link>
                       ))}

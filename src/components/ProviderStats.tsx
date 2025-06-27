@@ -43,28 +43,28 @@ export default function ProviderStats() {
       icon: Server,
       label: "VPS Plans",
       value: stats.totalPlans.toLocaleString(),
-      color: "bg-blue-100 text-blue-800"
+      color: "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300"
     },
     {
       id: "providers",
       icon: Building2,
       label: "Providers",
       value: stats.totalProviders.toString(),
-      color: "bg-green-100 text-green-800"
+      color: "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300"
     },
     {
       id: "countries",
       icon: Globe,
       label: "Countries",
       value: stats.countriesCount.toString(),
-      color: "bg-purple-100 text-purple-800"
+      color: "bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300"
     },
     {
       id: "price",
       icon: DollarSign,
       label: "Lowest Price",
       value: `${stats.lowestPrice.toFixed(2)}/mo`,
-      color: "bg-orange-100 text-orange-800"
+      color: "bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300"
     }
   ];
 
@@ -73,15 +73,15 @@ export default function ProviderStats() {
       {statCards.map((stat) => {
         const Icon = stat.icon;
         return (
-          <Card key={stat.id} className="border-0 shadow-sm">
+          <Card key={stat.id} className="border-0 shadow-sm bg-white dark:bg-gray-900">
             <CardContent className="p-4">
               <div className="flex items-center space-x-3">
                 <div className={`p-2 rounded-lg ${stat.color}`}>
                   <Icon className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">{stat.label}</p>
-                  <p className="text-lg font-semibold text-gray-900">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{stat.label}</p>
+                  <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                     {loading ? "..." : stat.value}
                   </p>
                 </div>

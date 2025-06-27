@@ -11,13 +11,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, RefreshCw, AlertCircle, Clock, ArrowUpDown, ExternalLink } from "lucide-react";
+import { ChevronLeft, ChevronRight, RefreshCw, AlertCircle, Clock, ArrowUpDown, ExternalLink, List, LayoutGrid } from "lucide-react";
 import Link from "next/link";
 import { useVPSData } from "@/hooks/useVPSData";
 import type { VPSPlan } from "@/types/vps";
 import FilterDropdown from "@/components/FilterDropdown";
 import DataSourceToggle from "@/components/DataSourceToggle";
 import { TABLE_DEFAULTS, API, FLAG_CDN_URL } from "@/lib/constants";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 function FlagIcon({ countryCode }: { countryCode: string }) {
   const flagUrl = `${FLAG_CDN_URL}/${countryCode.toLowerCase()}.png`;
@@ -37,7 +38,7 @@ function LoadingRow() {
       <TableCell colSpan={11} className="text-center py-8">
         <div className="flex items-center justify-center space-x-2">
           <RefreshCw className="h-4 w-4 animate-spin" />
-          <span className="text-gray-600">Loading VPS data...</span>
+          <span className="text-gray-600 dark:text-gray-400">Loading VPS data...</span>
         </div>
       </TableCell>
     </TableRow>
@@ -49,7 +50,7 @@ function ErrorRow({ error, onRetry }: { error: string; onRetry: () => void }) {
     <TableRow>
       <TableCell colSpan={11} className="text-center py-8">
         <div className="flex flex-col items-center space-y-3">
-          <div className="flex items-center space-x-2 text-red-600">
+          <div className="flex items-center space-x-2 text-red-600 dark:text-red-400">
             <AlertCircle className="h-4 w-4" />
             <span>Error: {error}</span>
           </div>
@@ -129,8 +130,9 @@ export default function VPSTable({
   const searchParams = useSearchParams();
   const providerFromUrl = searchParams.get('provider');
 
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
   const [currentPage, setCurrentPage] = useState(TABLE_DEFAULTS.CURRENT_PAGE);
-  const [rowsPerPage, setRowsPerPage] = useState(TABLE_DEFAULTS.ROWS_PER_PAGE);
+  const [rowsPerPage, setRowsPerPage] = useState(defaultPageSize);
   const [selectedProvider, setSelectedProvider] = useState<string | null>(providerFromUrl);
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [allProviders, setAllProviders] = useState<string[]>([]);
@@ -223,7 +225,7 @@ export default function VPSTable({
   
     return (
       <TableHead
-        className="font-semibold text-gray-700 cursor-pointer hover:bg-gray-100"
+        className="font-semibold text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
         onClick={() => requestSort(sortKey)}
       >
         <div className="flex items-center">
@@ -247,24 +249,27 @@ export default function VPSTable({
       <div className="flex flex-wrap items-center gap-4">
         {showDataSourceToggle && (
           <div className="flex items-center space-x-2">
-            <span className="text-sm font-medium text-gray-600">Data Source:</span>
-            <DataSourceToggle
-              dataSource={dataSource}
-              onToggle={handleDataSourceChange}
-            />
+            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Data Source:</span>
+            <DataSourceToggle dataSource={dataSource} onToggle={handleDataSourceChange} />
           </div>
         )}
-        {showProviderFilter && allProviders.length > 0 && (
-           <FilterDropdown
-            label="Providers"
+        <div className="flex-grow" />
+        <div className="md:hidden">
+          <Button variant="outline" size="icon" onClick={() => setViewMode(viewMode === 'table' ? 'grid' : 'table')}>
+            {viewMode === 'table' ? <LayoutGrid className="h-4 w-4" /> : <List className="h-4 w-4" />}
+          </Button>
+        </div>
+        {showProviderFilter && (
+          <FilterDropdown
+            label="Provider"
             options={allProviders}
             selectedValue={selectedProvider}
             onValueChange={handleProviderChange}
           />
         )}
-        {showTypeFilter && allTypes.length > 0 && (
-          <FilterDropdown
-            label="Types"
+        {showTypeFilter && (
+           <FilterDropdown
+            label="Type"
             options={allTypes}
             selectedValue={selectedType}
             onValueChange={handleTypeChange}
@@ -272,130 +277,161 @@ export default function VPSTable({
         )}
       </div>
 
-      <div className="flex items-center justify-between bg-white p-3 rounded-lg shadow text-sm">
+      <div className="flex items-center justify-between bg-white dark:bg-black p-3 rounded-lg shadow text-sm">
         <div className="flex items-center space-x-4">
-          <span className="text-gray-600">
+          <span className="text-gray-600 dark:text-gray-300">
             {dataSource === 'real' ? 'Live' : 'Manual'} VPS pricing from {selectedProvider ? 1 : allProviders.length} providers
-            {selectedProvider && ` (filtered by ${selectedProvider})`}
+            {total > 0 && ` | Showing ${startIndex + 1}-${endIndex} of ${total}`}
+            {selectedProvider && ` for ${selectedProvider}`}
             {selectedType && ` (filtered by ${selectedType})`}
           </span>
           {lastUpdated && (
-            <div className="flex items-center space-x-1 text-gray-500">
+            <div className="flex items-center space-x-1 text-gray-500 dark:text-gray-400">
               <Clock className="h-3 w-3" />
               <span>Updated {formatLastUpdated(lastUpdated)}</span>
             </div>
           )}
         </div>
         <div className="flex items-center space-x-2">
-          <Button
-            onClick={refetch}
-            variant="outline"
-            size="sm"
-            disabled={loading}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
+           <span className="text-gray-600 dark:text-gray-400">Rows:</span>
+           <select
+             value={rowsPerPage}
+             onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+             className="p-1 border rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+           >
+             {[10, 25, 50, 100].map(size => (
+               <option key={size} value={size}>{size}</option>
+             ))}
+           </select>
+          <Button onClick={() => refetch()} variant="ghost" size="icon" title="Refresh data">
+            <RefreshCw className="h-4 w-4" />
           </Button>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-gray-50">
-              <SortableHeader sortKey="planName">Name</SortableHeader>
+      {/* Grid View for Mobile */}
+      <div className={`grid md:hidden grid-cols-1 sm:grid-cols-2 gap-4 ${viewMode === 'grid' ? '' : 'hidden'}`}>
+        {loading && Array.from({ length: rowsPerPage }).map((_, index) => (
+          <Card key={index} className="animate-pulse">
+            <CardHeader>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-4/6"></div>
+            </CardContent>
+          </Card>
+        ))}
+        {!loading && !error && data.map((plan) => (
+          <Card key={plan.id} className="bg-white dark:bg-black rounded-lg shadow">
+            <CardHeader>
+              <CardTitle className="text-lg font-bold text-gray-800 dark:text-white truncate">
+                <Link href={`/vps/${plan.id}`} className="hover:underline">
+                  {formatPlanName(plan)}
+                </Link>
+                <a href={plan.url} target="_blank" rel="noopener noreferrer" className="ml-2">
+                  <ExternalLink size={16} className="inline text-gray-500" />
+                </a>
+              </CardTitle>
               {showProviderColumn && (
-                <SortableHeader sortKey="provider">Provider</SortableHeader>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{plan.provider}</p>
               )}
-              <SortableHeader sortKey="location">Location</SortableHeader>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-2 text-sm">
+              <div><strong className="text-gray-600 dark:text-gray-300">Price:</strong> {formatPrice(plan.price, plan.currency)}/mo</div>
+              <div><strong className="text-gray-600 dark:text-gray-300">CPU:</strong> {plan.cpu}</div>
+              <div><strong className="text-gray-600 dark:text-gray-300">RAM:</strong> {plan.ram}</div>
+              <div><strong className="text-gray-600 dark:text-gray-300">Disk:</strong> {plan.storage}</div>
+              <div><strong className="text-gray-600 dark:text-gray-300">Location:</strong> <FlagIcon countryCode={plan.location.countryCode} /> {plan.location.city}</div>
+              <div className="col-span-2"><strong className="text-gray-600 dark:text-gray-300">Bandwidth:</strong> {formatBandwidth(plan.bandwidth)}</div>
+            </CardContent>
+          </Card>
+        ))}
+        {error && <p className="text-red-500 col-span-full text-center">{error}</p>}
+      </div>
+
+      {/* Table View for Desktop */}
+      <div className={`bg-white dark:bg-black rounded-lg shadow overflow-x-auto ${viewMode === 'table' ? '' : 'hidden md:block'}`}>
+        <Table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+          <TableHeader className="bg-gray-50 dark:bg-gray-900/50">
+            <TableRow>
+              <SortableHeader sortKey="planName">Plan</SortableHeader>
+              {showProviderColumn && <SortableHeader sortKey="provider">Provider</SortableHeader>}
               <SortableHeader sortKey="cpu">CPU</SortableHeader>
               <SortableHeader sortKey="ram">RAM</SortableHeader>
-              <SortableHeader sortKey="disk">Storage</SortableHeader>
-              <SortableHeader sortKey="type">Type</SortableHeader>
-              <SortableHeader sortKey="price">Monthly Price</SortableHeader>
+              <SortableHeader sortKey="storage">Disk</SortableHeader>
+              <SortableHeader sortKey="location">Location</SortableHeader>
               <SortableHeader sortKey="bandwidth">Bandwidth</SortableHeader>
-              <TableHead></TableHead>
+              <SortableHeader sortKey="price">Price/mo</SortableHeader>
+              <TableHead>Link</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
-            {loading && <LoadingRow />}
-            {!loading && error && <ErrorRow error={error} onRetry={refetch} />}
-            {!loading && !error && (
-              <>
-                {data.map((plan: VPSPlan) => (
-                  <TableRow key={plan.id} className="hover:bg-gray-50">
-                    <TableCell className="font-medium">
-                      <Link href={`/vps/${plan.id}`} className="text-blue-600 hover:underline">
-                        {plan.planName}
-                      </Link>
-                    </TableCell>
-                    {showProviderColumn && (
-                      <TableCell>
-                        <Link href={`/providers/${plan.providerSlug}`} className="text-blue-600 hover:underline">
-                          {plan.provider}
-                        </Link>
-                      </TableCell>
-                    )}
-                    <TableCell>
-                      <FlagIcon countryCode={plan.location.countryCode} />
-                      {plan.location.city}
-                    </TableCell>
-                    <TableCell>{plan.cpu}</TableCell>
-                    <TableCell>{plan.ram}</TableCell>
-                    <TableCell>{plan.storage}</TableCell>
-                    <TableCell>{plan.type}</TableCell>
-                    <TableCell className="font-semibold text-orange-600">
-                      {formatPrice(plan.price, plan.currency)}
-                    </TableCell>
-                    <TableCell>{formatBandwidth(plan.bandwidth)}</TableCell>
-                    <TableCell>
-                      <Button asChild size="sm" variant="outline">
-                        <a href={plan.url} target="_blank" rel="noopener noreferrer nofollow">
-                          Order
-                          <ExternalLink className="h-3 w-3 ml-1.5" />
-                        </a>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </>
+          <TableBody className="divide-y divide-gray-200 dark:divide-gray-800">
+            {loading ? (
+              <LoadingRow />
+            ) : error ? (
+              <ErrorRow error={error} onRetry={() => refetch()} />
+            ) : data.length === 0 ? (
+               <TableRow>
+                <TableCell colSpan={11} className="text-center py-8 text-gray-600 dark:text-gray-400">
+                  No VPS plans found for the selected filters.
+                </TableCell>
+              </TableRow>
+            ) : (
+              data.map((plan) => (
+                <TableRow key={plan.id} className="hover:bg-gray-50 dark:hover:bg-gray-900/50">
+                  <TableCell className="font-medium text-gray-800 dark:text-white">
+                    <Link href={`/vps/${plan.id}`} className="hover:underline">
+                      {formatPlanName(plan)}
+                    </Link>
+                  </TableCell>
+                  {showProviderColumn && (
+                    <TableCell className="text-gray-600 dark:text-gray-400">{plan.provider}</TableCell>
+                  )}
+                  <TableCell className="text-gray-600 dark:text-gray-400">{plan.cpu}</TableCell>
+                  <TableCell className="text-gray-600 dark:text-gray-400">{plan.ram}</TableCell>
+                  <TableCell className="text-gray-600 dark:text-gray-400">{plan.storage}</TableCell>
+                  <TableCell className="text-gray-600 dark:text-gray-400">
+                    <FlagIcon countryCode={plan.location.countryCode} />
+                    {plan.location.city}
+                  </TableCell>
+                  <TableCell className="text-gray-600 dark:text-gray-400">{formatBandwidth(plan.bandwidth)}</TableCell>
+                  <TableCell className="font-semibold text-gray-800 dark:text-white">{formatPrice(plan.price, plan.currency)}</TableCell>
+                  <TableCell>
+                    <a
+                      href={plan.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                    >
+                      <ExternalLink size={18} />
+                    </a>
+                  </TableCell>
+                </TableRow>
+              ))
             )}
           </TableBody>
         </Table>
       </div>
-
-      {/* Pagination */}
-      <div className="flex items-center justify-between bg-white p-3 rounded-lg shadow text-sm">
-        <div className="text-gray-600">
-          Showing {startIndex + 1} - {endIndex} of {total} results
-        </div>
+      <div className="flex items-center justify-between pt-4">
+        <span className="text-sm text-gray-600 dark:text-gray-400">
+          Showing {startIndex + 1} to {endIndex} of {total} results
+        </span>
         <div className="flex items-center space-x-2">
-          <span className="text-gray-600">Rows per page:</span>
-          <select
-            value={rowsPerPage}
-            onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-            className="p-1 rounded-md border-gray-300"
-          >
-            {TABLE_DEFAULTS.ROWS_PER_PAGE_OPTIONS.map(size => (
-              <option key={size} value={size}>{size}</option>
-            ))}
-          </select>
           <Button
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
             variant="outline"
             size="sm"
+            onClick={() => setCurrentPage(currentPage - 1)}
+            disabled={currentPage === 1}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
           <Button
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
             variant="outline"
             size="sm"
+            onClick={() => setCurrentPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>

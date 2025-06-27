@@ -11,6 +11,7 @@ type BlogPostPageProps = {
   params: {
     slug: string;
   };
+  searchParams: { [key: string]: string | string[] | undefined };
 };
 
 export async function generateStaticParams() {
@@ -109,53 +110,55 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Navigation />
-      <div className="container mx-auto px-4 py-8 md:py-12">
-        <main className="grid lg:grid-cols-4 gap-12">
-          <article className="lg:col-span-3 prose prose-lg dark:prose-invert max-w-none">
-            <header className="mb-8">
-              <Link href="/blog" className="text-indigo-600 dark:text-indigo-400 hover:underline mb-4 block">
-                &larr; Back to Blog
-              </Link>
-              <p className="text-base text-gray-500 dark:text-gray-400">{post.category} / {post.publishedAt}</p>
-              <h1 className="mt-2 text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
-                {post.title}
-              </h1>
-              <div className="mt-4 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                  <span>By {post.author}</span>
-                  <span className="mx-2">&bull;</span>
-                  <span>{post.readingTime}</span>
-              </div>
-            </header>
+      <div className="bg-white dark:bg-gray-950">
+        <div className="container mx-auto px-4 py-8 md:py-12">
+          <main className="grid lg:grid-cols-4 gap-12">
+            <article className="lg:col-span-3 prose prose-lg dark:prose-invert max-w-none">
+              <header className="mb-8">
+                <Link href="/blog" className="text-indigo-600 dark:text-indigo-400 hover:underline mb-4 block">
+                  &larr; Back to Blog
+                </Link>
+                <p className="text-base text-gray-500 dark:text-gray-400">{post.category} / {post.publishedAt}</p>
+                <h1 className="mt-2 text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
+                  {post.title}
+                </h1>
+                <div className="mt-4 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                    <span>By {post.author}</span>
+                    <span className="mx-2">&bull;</span>
+                    <span>{post.readingTime}</span>
+                </div>
+              </header>
 
-            <Image
-              src={post.imageUrl}
-              alt={post.title}
-              width={1200}
-              height={630}
-              className="w-full h-auto rounded-lg mb-8 shadow-lg"
-              priority
-            />
+              <Image
+                src={post.imageUrl}
+                alt={post.title}
+                width={1200}
+                height={630}
+                className="w-full h-auto rounded-lg mb-8 shadow-lg"
+                priority
+              />
+              
+              <div className="text-gray-800 dark:text-gray-200" dangerouslySetInnerHTML={{ __html: parsedContent }} />
             
-            <div dangerouslySetInnerHTML={{ __html: parsedContent }} />
-          
-          </article>
+            </article>
 
-          <aside className="lg:col-span-1">
-            <div className="sticky top-24 p-6 bg-gray-100 dark:bg-gray-800 rounded-lg">
-              <h3 className="text-xl font-bold mb-4">Related Articles</h3>
-              <ul className="space-y-4">
-                {relatedPosts.map(relatedPost => (
-                  <li key={relatedPost.id}>
-                    <Link href={`/blog/${relatedPost.slug}`} className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-                      <p className="font-semibold">{relatedPost.title}</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{relatedPost.excerpt.substring(0, 70)}...</p>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </aside>
-        </main>
+            <aside className="lg:col-span-1">
+              <div className="sticky top-24 p-6 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                <h3 className="text-xl font-bold mb-4">Related Articles</h3>
+                <ul className="space-y-4">
+                  {relatedPosts.map(relatedPost => (
+                    <li key={relatedPost.id}>
+                      <Link href={`/blog/${relatedPost.slug}`} className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                        <p className="font-semibold">{relatedPost.title}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{relatedPost.excerpt.substring(0, 70)}...</p>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </aside>
+          </main>
+        </div>
       </div>
       <Footer />
     </>

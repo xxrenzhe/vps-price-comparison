@@ -16,61 +16,47 @@ export async function fetchBandwagonHostData(): Promise<VPSPlan[]> {
     return [
       {
         id: 'bandwagonhost-real-1',
-        name: 'CN2 GIA ECOMMERCE',
+        planName: 'CN2 GIA ECOMMERCE',
         provider: 'BandwagonHost',
         type: 'VPS Hosting',
         virtualization: 'KVM',
-        monthlyPrice: 169.99,
+        price: 169.99,
         currency: 'USD',
+        frequency: 'Monthly',
         location: {
           country: 'United States',
           city: 'Los Angeles',
           countryCode: 'us'
         },
-        specs: {
-          cpu: 4,
-          diskGB: 80,
-          ramMB: 8192,
-          bandwidthGB: 5000,
-          portSpeed: '10 Gbps'
-        },
-        network: {
-          ipv4: 1,
-          ipv6: '/64'
-        },
-        features: ['CN2 GIA', 'KiwiVM Control Panel', 'Snapshots', 'Migration'],
-        availability: true,
-        lastUpdated: new Date().toISOString(),
+        cpu: '4 Cores',
+        ram: '8 GB',
+        storage: '80 GB SSD',
+        bandwidth: '5000 GB',
+        networkSpeed: '10 Gbps',
+        includedFeatures: ['CN2 GIA', 'KiwiVM Control Panel', 'Snapshots', 'Migration', '1 IPv4', '/64 IPv6'],
         url: 'https://bandwagonhost.com/',
         providerSlug: 'bandwagonhost'
       },
       {
         id: 'bandwagonhost-real-2',
-        name: 'HONGKONG PCCW',
+        planName: 'HONGKONG PCCW',
         provider: 'BandwagonHost',
         type: 'VPS Hosting',
         virtualization: 'KVM',
-        monthlyPrice: 89.99,
+        price: 89.99,
         currency: 'USD',
+        frequency: 'Monthly',
         location: {
           country: 'Hong Kong',
           city: 'Hong Kong',
           countryCode: 'hk'
         },
-        specs: {
-          cpu: 2,
-          diskGB: 40,
-          ramMB: 4096,
-          bandwidthGB: 500,
-          portSpeed: '1 Gbps'
-        },
-        network: {
-          ipv4: 1,
-          ipv6: '/64'
-        },
-        features: ['PCCW Network', 'China Optimized', 'DDoS Protection'],
-        availability: true,
-        lastUpdated: new Date().toISOString(),
+        cpu: '2 Cores',
+        ram: '4 GB',
+        storage: '40 GB SSD',
+        bandwidth: '500 GB',
+        networkSpeed: '1 Gbps',
+        includedFeatures: ['PCCW Network', 'China Optimized', 'DDoS Protection', '1 IPv4', '/64 IPv6'],
         url: 'https://bandwagonhost.com/',
         providerSlug: 'bandwagonhost'
       }
@@ -91,61 +77,47 @@ export async function fetchHostingerData(): Promise<VPSPlan[]> {
     return [
       {
         id: 'hostinger-real-1',
-        name: 'VPS 1',
+        planName: 'VPS 1',
         provider: 'Hostinger',
         type: 'VPS Hosting',
         virtualization: 'KVM',
-        monthlyPrice: 4.99,
+        price: 4.99,
         currency: 'USD',
+        frequency: 'Monthly',
         location: {
           country: 'United States',
           city: 'Ashburn',
           countryCode: 'us'
         },
-        specs: {
-          cpu: 1,
-          diskGB: 20,
-          ramMB: 1024,
-          bandwidthGB: 1000,
-          portSpeed: '1 Gbps'
-        },
-        network: {
-          ipv4: 1,
-          ipv6: 1
-        },
-        features: ['NVMe SSD', 'Weekly Backups', '24/7 Support', 'AI Assistant'],
-        availability: true,
-        lastUpdated: new Date().toISOString(),
+        cpu: '1 Core',
+        ram: '1 GB',
+        storage: '20 GB NVMe',
+        bandwidth: '1000 GB',
+        networkSpeed: '1 Gbps',
+        includedFeatures: ['NVMe SSD', 'Weekly Backups', '24/7 Support', 'AI Assistant', '1 IPv4', '1 IPv6'],
         url: 'https://www.hostinger.com/vps-hosting',
         providerSlug: 'hostinger'
       },
       {
         id: 'hostinger-real-2',
-        name: 'VPS 2',
+        planName: 'VPS 2',
         provider: 'Hostinger',
         type: 'VPS Hosting',
         virtualization: 'KVM',
-        monthlyPrice: 8.99,
+        price: 8.99,
         currency: 'USD',
+        frequency: 'Monthly',
         location: {
           country: 'United Kingdom',
           city: 'London',
           countryCode: 'gb'
         },
-        specs: {
-          cpu: 2,
-          diskGB: 40,
-          ramMB: 2048,
-          bandwidthGB: 2000,
-          portSpeed: '1 Gbps'
-        },
-        network: {
-          ipv4: 1,
-          ipv6: 1
-        },
-        features: ['NVMe SSD', 'Free Domain', 'Priority Support', 'CDN'],
-        availability: true,
-        lastUpdated: new Date().toISOString(),
+        cpu: '2 Cores',
+        ram: '2 GB',
+        storage: '40 GB NVMe',
+        bandwidth: '2000 GB',
+        networkSpeed: '1 Gbps',
+        includedFeatures: ['NVMe SSD', 'Free Domain', 'Priority Support', 'CDN', '1 IPv4', '1 IPv6'],
         url: 'https://www.hostinger.com/vps-hosting',
         providerSlug: 'hostinger'
       }
@@ -165,61 +137,47 @@ export async function fetchInterserverData(): Promise<VPSPlan[]> {
     return [
       {
         id: 'interserver-real-1',
-        name: 'Standard VPS',
+        planName: 'Standard VPS',
         provider: 'Interserver',
         type: 'VPS Hosting',
         virtualization: 'KVM',
-        monthlyPrice: 6.00,
+        price: 6.00,
         currency: 'USD',
+        frequency: 'Monthly',
         location: {
           country: 'United States',
           city: 'Secaucus',
           countryCode: 'us'
         },
-        specs: {
-          cpu: 1,
-          diskGB: 30,
-          ramMB: 1024,
-          bandwidthGB: 'unlimited',
-          portSpeed: '1 Gbps'
-        },
-        network: {
-          ipv4: 1,
-          ipv6: 1
-        },
-        features: ['Price Lock Guarantee', 'Free Migration', 'cPanel/WHM', '99.9% Uptime'],
-        availability: true,
-        lastUpdated: new Date().toISOString(),
+        cpu: '1 Core',
+        ram: '1 GB',
+        storage: '30 GB SSD',
+        bandwidth: 'Unlimited',
+        networkSpeed: '1 Gbps',
+        includedFeatures: ['Price Lock Guarantee', 'Free Migration', 'cPanel/WHM', '99.9% Uptime', '1 IPv4', '1 IPv6'],
         url: 'https://www.interserver.net/vps/',
         providerSlug: 'interserver'
       },
       {
         id: 'interserver-real-2',
-        name: 'Windows VPS',
+        planName: 'Windows VPS',
         provider: 'Interserver',
         type: 'VPS Hosting',
         virtualization: 'KVM',
-        monthlyPrice: 10.00,
+        price: 10.00,
         currency: 'USD',
+        frequency: 'Monthly',
         location: {
           country: 'United States',
           city: 'Los Angeles',
           countryCode: 'us'
         },
-        specs: {
-          cpu: 2,
-          diskGB: 50,
-          ramMB: 2048,
-          bandwidthGB: 'unlimited',
-          portSpeed: '1 Gbps'
-        },
-        network: {
-          ipv4: 1,
-          ipv6: 1
-        },
-        features: ['Windows Server 2019', 'RDP Access', 'Price Lock', 'SSD Storage'],
-        availability: true,
-        lastUpdated: new Date().toISOString(),
+        cpu: '2 Cores',
+        ram: '2 GB',
+        storage: '50 GB SSD',
+        bandwidth: 'Unlimited',
+        networkSpeed: '1 Gbps',
+        includedFeatures: ['Windows Server 2019', 'RDP Access', 'Price Lock', 'SSD Storage', '1 IPv4', '1 IPv6'],
         url: 'https://www.interserver.net/vps/',
         providerSlug: 'interserver'
       }

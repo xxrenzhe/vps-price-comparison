@@ -2,6 +2,8 @@ import { type NextRequest, NextResponse } from 'next/server';
 import type { VPSPlan, PaginatedVPSResponse } from '@/types/vps';
 import { mockVPSData } from '@/services/vpsData';
 
+export const dynamic = 'force-dynamic';
+
 const API_DEFAULTS = {
   PAGE: '1',
   PAGE_SIZE: '25',

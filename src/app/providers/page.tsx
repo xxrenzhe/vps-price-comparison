@@ -22,18 +22,18 @@ const activeProviders = providerDetails.filter(provider =>
 
 export default function ProvidersPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <Navigation />
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-6 sm:py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-4">
             VPS Hosting Providers
           </h1>
-          <p className="text-gray-600 mb-2">
+          <p className="text-gray-600 dark:text-gray-400 mb-2">
             Discover and compare VPS hosting providers from around the world.
             Find the perfect hosting solution for your needs.
           </p>
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-gray-500 dark:text-gray-400">
             Showing {activeProviders.length} providers across {new Set(activeProviders.flatMap(p => p.locations)).size} countries
           </div>
         </div>
@@ -44,11 +44,11 @@ export default function ProvidersPage() {
           ))}
         </div>
 
-        <div className="mt-12 bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+        <div className="mt-12 bg-white dark:bg-gray-900 rounded-lg shadow-sm p-4 sm:p-6">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">
             About VPS Hosting Providers
           </h2>
-          <div className="prose text-gray-600">
+          <div className="prose dark:prose-invert text-gray-600 dark:text-gray-400">
             <p className="mb-4">
               Virtual Private Server (VPS) hosting offers a perfect balance between shared hosting
               and dedicated servers. Each provider listed here offers unique features, pricing models,
