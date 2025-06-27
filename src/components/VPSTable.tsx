@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from 'next/navigation';
 import {
   Table,
   TableBody,
@@ -10,26 +11,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, RefreshCw, AlertCircle, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight, RefreshCw, AlertCircle, Clock, ArrowUpDown, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useVPSData } from "@/hooks/useVPSData";
 import type { VPSPlan } from "@/types/vps";
-import ProviderFilter from "@/components/ProviderFilter";
+import FilterDropdown from "@/components/FilterDropdown";
 import DataSourceToggle from "@/components/DataSourceToggle";
+import { TABLE_DEFAULTS, API, FLAG_CDN_URL } from "@/lib/constants";
 
 function FlagIcon({ countryCode }: { countryCode: string }) {
-  const flagUrl = `https://ext.same-assets.com/721190585/${
-    countryCode === 'de' ? '1030278012' :
-    countryCode === 'gb' ? '684761045' :
-    countryCode === 'us' ? '1712654018' :
-    countryCode === 'ca' ? '1571532171' :
-    countryCode === 'fi' ? '2049145698' :
-    countryCode === 'bg' ? '742734369' :
-    countryCode === 'nl' ? '594896309' :
-    countryCode === 'sg' ? '523359360' :
-    countryCode === 'hk' ? '1712654018' :
-    countryCode === 'lt' ? '1712654018' : '1712654018'
-  }.png`;
+  const flagUrl = `${FLAG_CDN_URL}/${countryCode.toLowerCase()}.png`;
 
   return (
     <img
@@ -81,10 +72,24 @@ function formatPrice(price: number, currency: string) {
   }).format(price);
 }
 
-function formatBandwidth(bandwidth: number | 'unlimited') {
-  if (bandwidth === 'unlimited') return 'Unlimited';
-  if (bandwidth >= 1000) return `${bandwidth / 1000} TB`;
-  return `${bandwidth} GB`;
+function formatPlanName(plan: VPSPlan) {
+  const providerName = plan.provider;
+  let planName = plan.planName;
+
+  // Remove provider name from plan name if it's already there to avoid duplication
+  if (planName.toLowerCase().includes(providerName.toLowerCase())) {
+    planName = planName.replace(new RegExp(providerName, 'i'), '').trim();
+  }
+  
+  return `${providerName} - ${planName}`;
+}
+
+function formatBandwidth(bandwidth: string) {
+  if (typeof bandwidth !== 'string') {
+    return 'N/A';
+  }
+  if (bandwidth.toLowerCase() === 'unmetered') return 'Unlimited';
+  return bandwidth;
 }
 
 function formatLastUpdated(dateString: string) {
@@ -99,71 +104,180 @@ function formatLastUpdated(dateString: string) {
   return date.toLocaleTimeString();
 }
 
-export default function VPSTable() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(25);
-  const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
+type SortConfig = {
+  key: keyof VPSPlan | 'cpu' | 'ram' | 'disk' | 'monthlyPrice' | 'location' | 'bandwidth';
+  direction: 'ascending' | 'descending';
+} | null;
+
+type VPSTableProps = {
+  providerFilter?: string;
+  showProviderColumn?: boolean;
+  defaultPageSize?: number;
+  showDataSourceToggle?: boolean;
+  showProviderFilter?: boolean;
+  showTypeFilter?: boolean;
+};
+
+export default function VPSTable({
+  providerFilter,
+  showProviderColumn = true,
+  defaultPageSize = 25,
+  showDataSourceToggle = true,
+  showProviderFilter = true,
+  showTypeFilter = true,
+}: VPSTableProps) {
+  const searchParams = useSearchParams();
+  const providerFromUrl = searchParams.get('provider');
+
+  const [currentPage, setCurrentPage] = useState(TABLE_DEFAULTS.CURRENT_PAGE);
+  const [rowsPerPage, setRowsPerPage] = useState(TABLE_DEFAULTS.ROWS_PER_PAGE);
+  const [selectedProvider, setSelectedProvider] = useState<string | null>(providerFromUrl);
+  const [selectedType, setSelectedType] = useState<string | null>(null);
   const [allProviders, setAllProviders] = useState<string[]>([]);
-  const [dataSource, setDataSource] = useState<'mock' | 'real'>('mock');
+  const [allTypes, setAllTypes] = useState<string[]>([]);
+  const [dataSource, setDataSource] = useState<'mock' | 'real'>(TABLE_DEFAULTS.DATA_SOURCE);
+  const [sortConfig, setSortConfig] = useState<SortConfig>(null);
 
-  const { data, total, totalPages, loading, error, lastUpdated, refetch } = useVPSData({
+  const {
+    data,
+    total,
+    totalPages,
+    loading,
+    error,
+    lastUpdated,
+    refetch,
+    setSort,
+    setPage,
+    setPageSize,
+  } = useVPSData({
+    pageSize: defaultPageSize,
+    provider: providerFilter || selectedProvider || undefined,
     page: currentPage,
-    pageSize: rowsPerPage,
-    provider: selectedProvider || undefined,
+    type: selectedType || undefined,
+    sortBy: sortConfig?.key,
+    sortOrder: sortConfig?.direction === 'ascending' ? 'asc' : 'desc',
     autoRefresh: true,
-    refreshInterval: 30000, // 30 seconds
-    dataSource
-  });
-
-  // Get all providers for filter (always from the current data source)
-  const { data: allData } = useVPSData({
-    pageSize: 1000,
-    autoRefresh: false,
+    refreshInterval: TABLE_DEFAULTS.REFRESH_INTERVAL,
     dataSource
   });
 
   useEffect(() => {
-    if (allData.length > 0) {
-      const providers = Array.from(new Set(allData.map(vps => vps.provider))).sort();
-      setAllProviders(providers);
+    async function fetchFilters() {
+      try {
+        const response = await fetch(API.PROVIDERS);
+        const result = await response.json();
+        if (result.success) {
+          setAllProviders(result.data.providers);
+          setAllTypes(result.data.types);
+        }
+      } catch (e) {
+        console.error("Failed to fetch filters", e);
+      }
     }
-  }, [allData]);
+    fetchFilters();
+  }, [dataSource]);
 
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = Math.min(startIndex + rowsPerPage, total);
 
   const handlePageSizeChange = (size: number) => {
     setRowsPerPage(size);
-    setCurrentPage(1);
+    setCurrentPage(TABLE_DEFAULTS.CURRENT_PAGE);
   };
 
   const handleProviderChange = (provider: string | null) => {
     setSelectedProvider(provider);
-    setCurrentPage(1);
+    setCurrentPage(TABLE_DEFAULTS.CURRENT_PAGE);
   };
 
+  const handleTypeChange = (type: string | null) => {
+    setSelectedType(type);
+    setCurrentPage(TABLE_DEFAULTS.CURRENT_PAGE);
+  };
+  
   const handleDataSourceChange = (source: 'mock' | 'real') => {
     setDataSource(source);
-    setSelectedProvider(null); // Reset provider filter when changing data source
-    setCurrentPage(1);
+    setSelectedProvider(null);
+    setSelectedType(null);
+    setCurrentPage(TABLE_DEFAULTS.CURRENT_PAGE);
+    setSortConfig(null);
   };
 
+  const requestSort = (key: NonNullable<SortConfig>['key']) => {
+    let direction: 'ascending' | 'descending' = 'ascending';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+  };
+  
+  const SortableHeader = ({
+    sortKey,
+    children,
+  }: {
+    sortKey: NonNullable<SortConfig>['key'];
+    children: React.ReactNode;
+  }) => {
+    const isSorted = sortConfig?.key === sortKey;
+    const direction = sortConfig?.direction;
+  
+    return (
+      <TableHead
+        className="font-semibold text-gray-700 cursor-pointer hover:bg-gray-100"
+        onClick={() => requestSort(sortKey)}
+      >
+        <div className="flex items-center">
+          {children}
+          {isSorted ? (
+            direction === 'ascending' ? (
+              <ArrowUpDown size={14} className="ml-2" />
+            ) : (
+              <ArrowUpDown size={14} className="ml-2" />
+            )
+          ) : (
+            <ArrowUpDown size={14} className="ml-2 opacity-30" />
+          )}
+        </div>
+      </TableHead>
+    );
+  };
+  
   return (
     <div className="space-y-4">
-      {/* Data Source Toggle */}
-      <div className="flex justify-center">
-        <DataSourceToggle
-          dataSource={dataSource}
-          onToggle={handleDataSourceChange}
-        />
+      <div className="flex flex-wrap items-center gap-4">
+        {showDataSourceToggle && (
+          <div className="flex items-center space-x-2">
+            <span className="text-sm font-medium text-gray-600">Data Source:</span>
+            <DataSourceToggle
+              dataSource={dataSource}
+              onToggle={handleDataSourceChange}
+            />
+          </div>
+        )}
+        {showProviderFilter && allProviders.length > 0 && (
+           <FilterDropdown
+            label="Providers"
+            options={allProviders}
+            selectedValue={selectedProvider}
+            onValueChange={handleProviderChange}
+          />
+        )}
+        {showTypeFilter && allTypes.length > 0 && (
+          <FilterDropdown
+            label="Types"
+            options={allTypes}
+            selectedValue={selectedType}
+            onValueChange={handleTypeChange}
+          />
+        )}
       </div>
 
-      {/* Status Bar */}
       <div className="flex items-center justify-between bg-white p-3 rounded-lg shadow text-sm">
         <div className="flex items-center space-x-4">
           <span className="text-gray-600">
-            {dataSource === 'real' ? 'Live' : 'Manual'} VPS pricing from {new Set(data.map(vps => vps.provider)).size} providers
+            {dataSource === 'real' ? 'Live' : 'Manual'} VPS pricing from {selectedProvider ? 1 : allProviders.length} providers
             {selectedProvider && ` (filtered by ${selectedProvider})`}
+            {selectedType && ` (filtered by ${selectedType})`}
           </span>
           {lastUpdated && (
             <div className="flex items-center space-x-1 text-gray-500">
@@ -173,11 +287,6 @@ export default function VPSTable() {
           )}
         </div>
         <div className="flex items-center space-x-2">
-          <ProviderFilter
-            providers={allProviders}
-            selectedProvider={selectedProvider}
-            onProviderChange={handleProviderChange}
-          />
           <Button
             onClick={refetch}
             variant="outline"
@@ -190,147 +299,103 @@ export default function VPSTable() {
         </div>
       </div>
 
-      {/* Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="bg-gray-50">
-              <TableHead className="font-semibold text-gray-700">Name</TableHead>
-              <TableHead className="font-semibold text-gray-700">Provider</TableHead>
-              <TableHead className="font-semibold text-gray-700">Type</TableHead>
-              <TableHead className="font-semibold text-gray-700">Monthly Price</TableHead>
-              <TableHead className="font-semibold text-gray-700">Location</TableHead>
-              <TableHead className="font-semibold text-gray-700">CPU</TableHead>
-              <TableHead className="font-semibold text-gray-700">RAM</TableHead>
-              <TableHead className="font-semibold text-gray-700">Disk</TableHead>
-              <TableHead className="font-semibold text-gray-700">Bandwidth</TableHead>
-              <TableHead className="font-semibold text-gray-700">IPv4</TableHead>
-              <TableHead className="font-semibold text-gray-700">IPv6</TableHead>
+              <SortableHeader sortKey="planName">Name</SortableHeader>
+              {showProviderColumn && (
+                <SortableHeader sortKey="provider">Provider</SortableHeader>
+              )}
+              <SortableHeader sortKey="location">Location</SortableHeader>
+              <SortableHeader sortKey="cpu">CPU</SortableHeader>
+              <SortableHeader sortKey="ram">RAM</SortableHeader>
+              <SortableHeader sortKey="disk">Storage</SortableHeader>
+              <SortableHeader sortKey="type">Type</SortableHeader>
+              <SortableHeader sortKey="price">Monthly Price</SortableHeader>
+              <SortableHeader sortKey="bandwidth">Bandwidth</SortableHeader>
+              <TableHead></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading && data.length === 0 && <LoadingRow />}
-            {error && <ErrorRow error={error} onRetry={refetch} />}
-            {!loading && !error && data.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={11} className="text-center py-8 text-gray-500">
-                  No VPS plans found matching your criteria.
-                </TableCell>
-              </TableRow>
+            {loading && <LoadingRow />}
+            {!loading && error && <ErrorRow error={error} onRetry={refetch} />}
+            {!loading && !error && (
+              <>
+                {data.map((plan: VPSPlan) => (
+                  <TableRow key={plan.id} className="hover:bg-gray-50">
+                    <TableCell className="font-medium">
+                      <Link href={`/vps/${plan.id}`} className="text-blue-600 hover:underline">
+                        {plan.planName}
+                      </Link>
+                    </TableCell>
+                    {showProviderColumn && (
+                      <TableCell>
+                        <Link href={`/providers/${plan.providerSlug}`} className="text-blue-600 hover:underline">
+                          {plan.provider}
+                        </Link>
+                      </TableCell>
+                    )}
+                    <TableCell>
+                      <FlagIcon countryCode={plan.location.countryCode} />
+                      {plan.location.city}
+                    </TableCell>
+                    <TableCell>{plan.cpu}</TableCell>
+                    <TableCell>{plan.ram}</TableCell>
+                    <TableCell>{plan.storage}</TableCell>
+                    <TableCell>{plan.type}</TableCell>
+                    <TableCell className="font-semibold text-orange-600">
+                      {formatPrice(plan.price, plan.currency)}
+                    </TableCell>
+                    <TableCell>{formatBandwidth(plan.bandwidth)}</TableCell>
+                    <TableCell>
+                      <Button asChild size="sm" variant="outline">
+                        <a href={plan.url} target="_blank" rel="noopener noreferrer nofollow">
+                          Order
+                          <ExternalLink className="h-3 w-3 ml-1.5" />
+                        </a>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </>
             )}
-            {data.map((vps: VPSPlan) => (
-              <TableRow key={vps.id} className="hover:bg-gray-50">
-                <TableCell className="font-medium">
-                  <Link
-                    href={`/providers/${vps.providerSlug}`}
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    {vps.name}
-                  </Link>
-                </TableCell>
-                <TableCell>
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    {vps.provider}
-                  </span>
-                </TableCell>
-                <TableCell>{vps.type}</TableCell>
-                <TableCell className="font-semibold text-orange-600">
-                  {formatPrice(vps.monthlyPrice, vps.currency)}
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center">
-                    <FlagIcon countryCode={vps.location.countryCode} />
-                    <div className="flex flex-col">
-                      <span className="text-sm">{vps.location.city}</span>
-                      <span className="text-xs text-gray-500">{vps.location.country}</span>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>{vps.specs.cpu} Core{vps.specs.cpu > 1 ? 's' : ''}</TableCell>
-                <TableCell>{Math.round(vps.specs.ramMB / 1024 * 100) / 100} GB</TableCell>
-                <TableCell>{vps.specs.diskGB} GB</TableCell>
-                <TableCell>{formatBandwidth(vps.specs.bandwidthGB)}</TableCell>
-                <TableCell>{vps.network.ipv4}</TableCell>
-                <TableCell>{vps.network.ipv6}</TableCell>
-              </TableRow>
-            ))}
           </TableBody>
         </Table>
       </div>
 
-      {/* Pagination Controls */}
-      <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow">
-        <div className="flex items-center space-x-2 text-sm text-gray-600">
-          <span>Showing {startIndex + 1} to {endIndex} of {total} VPS plans</span>
-          <div className="flex items-center space-x-1 ml-4">
-            {[10, 25, 50, 100].map((size) => (
-              <Button
-                key={size}
-                variant={rowsPerPage === size ? "default" : "outline"}
-                size="sm"
-                onClick={() => handlePageSizeChange(size)}
-              >
-                {size}
-              </Button>
-            ))}
-            <span className="text-gray-600 ml-2">per page</span>
-          </div>
+      {/* Pagination */}
+      <div className="flex items-center justify-between bg-white p-3 rounded-lg shadow text-sm">
+        <div className="text-gray-600">
+          Showing {startIndex + 1} - {endIndex} of {total} results
         </div>
-
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-2">
+          <span className="text-gray-600">Rows per page:</span>
+          <select
+            value={rowsPerPage}
+            onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+            className="p-1 rounded-md border-gray-300"
+          >
+            {TABLE_DEFAULTS.ROWS_PER_PAGE_OPTIONS.map(size => (
+              <option key={size} value={size}>{size}</option>
+            ))}
+          </select>
           <Button
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
             variant="outline"
             size="sm"
-            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-            disabled={currentPage === 1 || loading}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-
-          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-            let pageNum: number;
-            if (totalPages <= 5) {
-              pageNum = i + 1;
-            } else if (currentPage <= 3) {
-              pageNum = i + 1;
-            } else if (currentPage >= totalPages - 2) {
-              pageNum = totalPages - 4 + i;
-            } else {
-              pageNum = currentPage - 2 + i;
-            }
-
-            return (
-              <Button
-                key={pageNum}
-                variant={currentPage === pageNum ? "default" : "outline"}
-                size="sm"
-                onClick={() => setCurrentPage(pageNum)}
-                disabled={loading}
-              >
-                {pageNum}
-              </Button>
-            );
-          })}
-
-          {totalPages > 5 && currentPage < totalPages - 2 && (
-            <>
-              <span className="text-gray-600">...</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(totalPages)}
-                disabled={loading}
-              >
-                {totalPages}
-              </Button>
-            </>
-          )}
-
+          <span>
+            Page {currentPage} of {totalPages}
+          </span>
           <Button
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
             variant="outline"
             size="sm"
-            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-            disabled={currentPage === totalPages || loading}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>

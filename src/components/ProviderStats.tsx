@@ -23,7 +23,7 @@ export default function ProviderStats() {
     if (data.length > 0) {
       const providers = new Set(data.map(vps => vps.provider));
       const countries = new Set(data.map(vps => vps.location.country));
-      const prices = data.map(vps => vps.monthlyPrice);
+      const prices = data.map(vps => vps.price);
       const avgPrice = prices.reduce((sum, price) => sum + price, 0) / prices.length;
       const lowestPrice = Math.min(...prices);
 

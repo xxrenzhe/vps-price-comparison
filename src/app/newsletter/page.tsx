@@ -19,8 +19,8 @@ import {
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: 'Newsletter - Cheap VPS List',
-  description: 'Subscribe to our newsletter for the latest VPS hosting deals, industry news, and exclusive insights delivered to your inbox.',
+  title: 'Newsletter - Best VPS List',
+  description: 'Subscribe to our newsletter for the latest VPS deals, news, and exclusive offers.',
 };
 
 export default function NewsletterPage() {
@@ -236,7 +236,7 @@ export default function NewsletterPage() {
                       required
                     />
                     <label htmlFor="agree" className="text-sm text-gray-600">
-                      I agree to receive emails from Cheap VPS List and understand I can unsubscribe at any time.
+                      I agree to receive emails from Best VPS List and understand I can unsubscribe at any time.
                       View our <a href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</a>.
                     </label>
                   </div>

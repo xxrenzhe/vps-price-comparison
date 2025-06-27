@@ -19,8 +19,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: 'About - Cheap VPS List',
-  description: 'Learn about Cheap VPS List, our mission to help you find the best VPS hosting deals, and our commitment to transparent pricing comparison.',
+  title: 'About - Best VPS List',
+  description: 'Learn about Best VPS List, our mission to help you find the best VPS hosting deals, and our commitment to transparent pricing comparison.',
 };
 
 export default function AboutPage() {
@@ -82,7 +82,7 @@ export default function AboutPage() {
         {/* Hero Section */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">
-            About Cheap VPS List
+            About Best VPS List
           </h1>
           <p className="text-xl text-gray-600 mb-6 max-w-3xl mx-auto">
             We're on a mission to make VPS hosting comparison simple, transparent,
@@ -133,7 +133,7 @@ export default function AboutPage() {
                 complex pricing structures, and promotional offers that make true comparison difficult.
               </p>
               <p className="text-gray-600 mb-4">
-                We created Cheap VPS List to solve this problem by providing real-time,
+                We created Best VPS List to solve this problem by providing real-time,
                 transparent pricing data from verified hosting providers. Our platform helps
                 you make informed decisions based on actual data, not marketing claims.
               </p>

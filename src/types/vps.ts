@@ -1,37 +1,46 @@
+export type PlanType =
+  | 'Shared Hosting'
+  | 'VPS Hosting'
+  | 'Cloud VPS'
+  | 'Dedicated Server'
+  | 'WordPress Hosting'
+  | 'Reseller Hosting'
+  | 'Managed VPS'
+  | 'Unmanaged VPS'
+  | 'Managed Cloud VPS'
+  | 'Cloud SSD VPS'
+  | 'Managed Cloud'
+  | 'High-Performance VPS'
+  | 'Managed Cloud Hosting'
+  | 'CN2 GIA VPS'
+  | 'Dubai VPS'
+  | 'KVM VPS'
+  | 'Linux VPS'
+  | 'Storage VPS';
+
+export interface Location {
+  country: string;
+  city: string;
+  countryCode: string;
+  region?: string;
+}
+
 export interface VPSPlan {
   id: string;
-  name: string;
   provider: string;
-  type: 'Shared Hosting' | 'VPS Hosting' | 'Cloud VPS' | 'Dedicated Server' | 'WordPress Hosting' | 'Reseller Hosting' | 'Managed VPS' | 'Unmanaged VPS';
-  virtualization?: 'KVM' | 'OpenVZ' | 'VMware' | 'Hyper-V' | 'Xen' | 'LXC';
-  monthlyPrice: number;
-  yearlyPrice?: number;
-  setupFee?: number;
-  currency: string;
-  location: {
-    country: string;
-    city: string;
-    countryCode: string;
-    region?: string;
-  };
-  specs: {
-    cpu: number;
-    cpuType?: string;
-    diskGB: number;
-    diskType?: 'SSD' | 'NVMe SSD' | 'HDD' | 'Hybrid';
-    ramMB: number;
-    bandwidthGB: number | 'unlimited';
-    portSpeed: string;
-  };
-  network: {
-    ipv4: number | 'NAT' | 'Shared';
-    ipv6: string | number | 'Shared';
-    ddosProtection?: boolean;
-  };
-  features: string[];
-  controlPanel?: string;
-  availability: boolean;
-  lastUpdated: string;
+  planName: string;
+  type: PlanType;
+  price: number;
+  currency: 'USD' | 'EUR' | 'GBP';
+  frequency: 'Monthly' | 'Quarterly' | 'Annually';
+  cpu: string;
+  ram: string;
+  storage: string;
+  bandwidth: string;
+  networkSpeed: string;
+  location: Location;
+  virtualization: string;
+  includedFeatures: string[];
   url: string;
   providerSlug: string;
 }

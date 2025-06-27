@@ -8,20 +8,20 @@ export default function Navigation() {
         <div className="flex items-center justify-between py-4">
           {/* Logo */}
           <Link href="/" className="text-2xl font-bold text-gray-800">
-            Cheap VPS List
+            Best VPS List
           </Link>
 
           {/* Social Media Links */}
           <div className="flex items-center space-x-4">
             <Link
-              href="https://twitter.com/cheapvpslist"
+              href="https://twitter.com/bestvpslist"
               className="text-blue-500 hover:text-blue-700 transition-colors"
               title="Twitter"
             >
               <Twitter size={20} />
             </Link>
             <Link
-              href="https://reddit.com/r/cheapvps"
+              href="https://reddit.com/r/bestvpslist"
               className="text-orange-500 hover:text-orange-700 transition-colors"
               title="Reddit"
             >

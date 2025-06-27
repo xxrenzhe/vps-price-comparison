@@ -6,6 +6,7 @@ import Link from "next/link";
 
 interface BlogPost {
   id: string;
+  slug: string;
   title: string;
   excerpt: string;
   content: string;
@@ -84,7 +85,7 @@ export default function BlogCard({ post, featured = false }: BlogCardProps) {
               </div>
 
               <Button asChild>
-                <Link href={`/blog/${post.id}`} className="flex items-center">
+                <Link href={`/blog/${post.slug}`} className="flex items-center">
                   Read More
                   <ArrowRight className="h-3 w-3 ml-1" />
                 </Link>
@@ -145,7 +146,7 @@ export default function BlogCard({ post, featured = false }: BlogCardProps) {
               <span>{formatDate(post.publishedAt)}</span>
             </div>
             <Button variant="outline" size="sm" asChild>
-              <Link href={`/blog/${post.id}`} className="flex items-center">
+              <Link href={`/blog/${post.slug}`} className="flex items-center">
                 Read
                 <ArrowRight className="h-3 w-3 ml-1" />
               </Link>

@@ -22,9 +22,16 @@ import {
 import Link from "next/link";
 import type { Metadata } from "next";
 
+const contactInfo = {
+  address: "123 Cloud St, San Francisco, CA 94107",
+  phone: "+1 (555) 123-4567",
+  email: "hello@bestvpslist.com",
+  hours: "Mon-Fri, 9am - 5pm PT"
+};
+
 export const metadata: Metadata = {
-  title: 'Contact - Cheap VPS List',
-  description: 'Get in touch with the Cheap VPS List team. Send us your questions, feedback, or suggestions about VPS hosting.',
+  title: 'Contact - Best VPS List',
+  description: 'Get in touch with the Best VPS List team. Send us your questions, feedback, or suggestions about VPS hosting.',
 };
 
 export default function ContactPage() {
@@ -33,7 +40,7 @@ export default function ContactPage() {
       icon: Mail,
       title: "Email Support",
       description: "Send us detailed questions or feedback",
-      contact: "hello@cheapvpslist.com",
+      contact: "hello@bestvpslist.com",
       responseTime: "Within 24 hours",
       color: "bg-blue-100 text-blue-600"
     },
@@ -41,7 +48,7 @@ export default function ContactPage() {
       icon: Twitter,
       title: "Twitter",
       description: "Follow us for updates and quick questions",
-      contact: "@cheapvpslist",
+      contact: "@bestvpslist",
       responseTime: "Within 4 hours",
       color: "bg-blue-100 text-blue-600"
     },
@@ -49,7 +56,7 @@ export default function ContactPage() {
       icon: MessageCircle,
       title: "Reddit Community",
       description: "Join our community discussions",
-      contact: "r/cheapvps",
+      contact: "r/bestvps",
       responseTime: "Community moderated",
       color: "bg-orange-100 text-orange-600"
     }
@@ -262,15 +269,22 @@ export default function ContactPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2 text-sm text-gray-600">
-                  <p className="font-medium text-gray-800">Cheap VPS List</p>
-                  <p>San Francisco, CA</p>
-                  <p>United States</p>
-                  <div className="flex items-center space-x-2 mt-3">
-                    <Clock className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm">
-                      Support: 24/7 (Email & Chat)
-                    </span>
+                <div className="space-y-4 text-sm text-gray-600">
+                  <div>
+                    <p className="font-medium text-gray-800">Best VPS List</p>
+                    <p>{contactInfo.address}</p>
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-800">Phone</p>
+                    <p>{contactInfo.phone}</p>
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-800">Email</p>
+                    <p>{contactInfo.email}</p>
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-800">Hours</p>
+                    <p>{contactInfo.hours}</p>
                   </div>
                 </div>
               </CardContent>
@@ -310,14 +324,14 @@ export default function ContactPage() {
           <CardContent>
             <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
               <Button variant="outline" asChild>
-                <Link href="https://twitter.com/cheapvpslist" className="flex items-center space-x-2">
+                <Link href="https://twitter.com/bestvpslist" className="flex items-center space-x-2">
                   <Twitter className="h-4 w-4 text-blue-500" />
                   <span>Follow on Twitter</span>
                 </Link>
               </Button>
 
               <Button variant="outline" asChild>
-                <Link href="https://reddit.com/r/cheapvps" className="flex items-center space-x-2">
+                <Link href="https://reddit.com/r/bestvps" className="flex items-center space-x-2">
                   <MessageCircle className="h-4 w-4 text-orange-500" />
                   <span>Join Reddit Community</span>
                 </Link>

@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     }
 
     filteredData = filteredData.filter(vps =>
-      vps.monthlyPrice >= minPrice && vps.monthlyPrice <= maxPrice
+      vps.price >= minPrice && vps.price <= maxPrice
     );
 
     // 分页
@@ -34,15 +34,8 @@ export async function GET(request: NextRequest) {
     const endIndex = startIndex + pageSize;
     const paginatedData = filteredData.slice(startIndex, endIndex);
 
-    // 添加轻微的价格波动（模拟实时更新）
-    const dataWithPriceVariation = paginatedData.map(vps => ({
-      ...vps,
-      monthlyPrice: Math.round((vps.monthlyPrice + (Math.random() - 0.5) * 0.5) * 100) / 100, // ±$0.25 随机波动
-      lastUpdated: new Date().toISOString()
-    }));
-
     const response: PaginatedVPSResponse = {
-      plans: dataWithPriceVariation,
+      plans: paginatedData,
       total,
       page,
       pageSize,

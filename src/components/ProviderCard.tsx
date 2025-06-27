@@ -2,6 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, MapPin, Calendar, Server, Star } from "lucide-react";
+import Image from "next/image";
+import Link from 'next/link';
 
 interface Provider {
   id: string;
@@ -27,8 +29,14 @@ export default function ProviderCard({ provider }: ProviderCardProps) {
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center">
-              <Server className="h-6 w-6 text-blue-600" />
+            <div className="w-12 h-12 bg-white border rounded-lg flex items-center justify-center p-1">
+              <Image
+                src={provider.logo}
+                alt={`${provider.name} logo`}
+                width={40}
+                height={40}
+                className="object-contain"
+              />
             </div>
             <div>
               <CardTitle className="text-lg font-semibold text-gray-800">
@@ -122,9 +130,9 @@ export default function ProviderCard({ provider }: ProviderCardProps) {
               className="text-xs"
               asChild
             >
-              <a href={`/?provider=${encodeURIComponent(provider.name)}`}>
+              <Link href={`/providers/${provider.id}`}>
                 View Plans
-              </a>
+              </Link>
             </Button>
             <Button
               size="sm"

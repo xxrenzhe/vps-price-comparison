@@ -16,17 +16,11 @@ export default function Home() {
           <p className="text-gray-600 mb-4">
             Compare VPS plans from top hosting providers with live pricing updates
           </p>
-
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
-            <div className="lg:col-span-3">
-              <ProviderStats />
-            </div>
-            <div className="lg:col-span-1">
-              <APIStatus />
-            </div>
-          </div>
+          <ProviderStats />
         </div>
-        <VPSTable />
+        <VPSTable 
+          showDataSourceToggle={false}
+        />
       </main>
       <Footer />
     </div>
