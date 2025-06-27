@@ -7,17 +7,8 @@ export const TABLE_DEFAULTS = {
   ROWS_PER_PAGE_OPTIONS: [10, 25, 50, 100],
 };
 
-const getApiBaseUrl = () => {
-  if (process.env.NEXT_PUBLIC_VERCEL_URL) {
-    return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
-  }
-  if (process.env.NEXT_PUBLIC_API_URL) {
-    return process.env.NEXT_PUBLIC_API_URL;
-  }
-  return 'http://localhost:3000';
-};
-
-const API_BASE_URL = getApiBaseUrl();
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 export const API = {
   PROVIDERS: `${API_BASE_URL}/api/providers`,
