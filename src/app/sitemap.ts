@@ -5,6 +5,7 @@ import { mockVPSData } from '@/services/vpsData';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const siteUrl = 'https://vps-price-comparison.com';
+  const lastModified = new Date('2024-07-26T00:00:00.000Z');
 
   const staticRoutes = [
     '',
@@ -16,7 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/newsletter',
   ].map((route) => ({
     url: `${siteUrl}${route}`,
-    lastModified: new Date(),
+    lastModified,
     changeFrequency: 'monthly' as const,
     priority: route === '' ? 1 : 0.8,
   }));
@@ -30,14 +31,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const providerRoutes = providerDetails.map((provider) => ({
     url: `${siteUrl}/providers/${provider.id}`,
-    lastModified: new Date(),
+    lastModified,
     changeFrequency: 'weekly' as const,
     priority: 0.9,
   }));
   
   const vpsRoutes = mockVPSData.map((plan) => ({
     url: `${siteUrl}/vps/${plan.id}`,
-    lastModified: new Date(),
+    lastModified,
     changeFrequency: 'daily' as const,
     priority: 0.6,
   }));
