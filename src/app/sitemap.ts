@@ -4,7 +4,7 @@ import { providerDetails } from '@/services/providerData';
 import { mockVPSData } from '@/services/vpsData';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const siteUrl = 'https://vps-price-comparison.com';
+  const siteUrl = 'https://www.bestvpslist.com';
   const lastModified = new Date('2024-07-26T00:00:00.000Z');
 
   const staticRoutes = [
